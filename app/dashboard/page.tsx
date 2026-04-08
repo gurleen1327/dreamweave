@@ -1,18 +1,35 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 
 export default function Dashboard() {
   const [dream, setDream] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null as any);
   const [error, setError] = useState("");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/login";
+      }
+      setChecking(false);
+    }
+    checkUser();
+  }, []);
+
+  async function handleSignout() {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
 
   async function handleSubmit() {
     if (!dream.trim()) return;
     setLoading(true);
     setError("");
     setAnalysis(null);
-
     try {
       const res = await fetch("/api/analyze-dream", {
         method: "POST",
@@ -31,9 +48,14 @@ export default function Dashboard() {
     } catch (e) {
       setError("Something went wrong. Please try again.");
     }
-
     setLoading(false);
   }
+
+  if (checking) return (
+    <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <p style={{ color: "#c4b5fd", fontFamily: "sans-serif" }}>Loading...</p>
+    </main>
+  );
 
   return (
     <main style={{
@@ -45,9 +67,20 @@ export default function Dashboard() {
     }}>
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-          <span style={{ fontSize: 28 }}>🌙</span>
-          <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 28 }}>🌙</span>
+            <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
+          </div>
+          <button onClick={handleSignout} style={{
+            background: "none",
+            border: "1px solid #4c1d95",
+            color: "#9ca3af",
+            padding: "6px 14px",
+            borderRadius: 8,
+            cursor: "pointer",
+            fontSize: 13
+          }}>Sign out</button>
         </div>
 
         <h2 style={{ fontSize: 20, fontWeight: "600", marginBottom: 8 }}>
