@@ -20,16 +20,15 @@ export default function Dashboard() {
         body: JSON.stringify({ dream })
       });
       const text = await res.text();
-      console.log("Raw response:", text);
       const data = JSON.parse(text);
-      console.log("API response:", JSON.stringify(data));
       setAnalysis({
         symbols: Array.isArray(data.symbols) ? data.symbols : [],
         emotions: Array.isArray(data.emotions) ? data.emotions : [],
-        interpretation: data.interpretation || "No interpretation available."
+        interpretation: data.interpretation || "",
+        mythology: data.mythology || "",
+        advice: data.advice || ""
       });
     } catch (e) {
-      console.error("Fetch error:", e);
       setError("Something went wrong. Please try again.");
     }
 
@@ -114,7 +113,7 @@ export default function Dashboard() {
               Your dream analysis
             </h3>
 
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>Symbols found</p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as any }}>
                 {analysis.symbols.map((s: string, i: number) => (
@@ -129,7 +128,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>Emotions detected</p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as any }}>
                 {analysis.emotions.map((e: string, i: number) => (
@@ -144,12 +143,41 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div>
+            <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>Interpretation</p>
-              <p style={{ fontSize: 15, color: "#e2e8f0", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 15, color: "#e2e8f0", lineHeight: 1.7 }}>
                 {analysis.interpretation}
               </p>
             </div>
+
+            {analysis.mythology && (
+              <div style={{
+                marginBottom: 20,
+                padding: 16,
+                background: "#0f0a1e",
+                borderRadius: 12,
+                borderLeft: "3px solid #7c3aed"
+              }}>
+                <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>🏛️ Mythological connection</p>
+                <p style={{ fontSize: 14, color: "#c4b5fd", lineHeight: 1.7 }}>
+                  {analysis.mythology}
+                </p>
+              </div>
+            )}
+
+            {analysis.advice && (
+              <div style={{
+                padding: 16,
+                background: "#0a1a0f",
+                borderRadius: 12,
+                borderLeft: "3px solid #059669"
+              }}>
+                <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>✨ What your dream is telling you</p>
+                <p style={{ fontSize: 14, color: "#6ee7b7", lineHeight: 1.7 }}>
+                  {analysis.advice}
+                </p>
+              </div>
+            )}
 
           </div>
         )}
