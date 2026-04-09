@@ -30,6 +30,7 @@ export default function Dashboard() {
     setLoading(true);
     setError("");
     setAnalysis(null);
+
     try {
       const res = await fetch("/api/analyze-dream", {
         method: "POST",
@@ -38,16 +39,34 @@ export default function Dashboard() {
       });
       const text = await res.text();
       const data = JSON.parse(text);
-      setAnalysis({
+
+      const analysisData = {
         symbols: Array.isArray(data.symbols) ? data.symbols : [],
         emotions: Array.isArray(data.emotions) ? data.emotions : [],
         interpretation: data.interpretation || "",
         mythology: data.mythology || "",
         advice: data.advice || ""
-      });
+      };
+
+      setAnalysis(analysisData);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.from("dreams").insert({
+          user_id: session.user.id,
+          content: dream,
+          symbols: analysisData.symbols,
+          emotions: analysisData.emotions,
+          interpretation: analysisData.interpretation,
+          mythology: analysisData.mythology,
+          advice: analysisData.advice
+        });
+      }
+
     } catch (e) {
       setError("Something went wrong. Please try again.");
     }
+
     setLoading(false);
   }
 
@@ -72,15 +91,27 @@ export default function Dashboard() {
             <span style={{ fontSize: 28 }}>🌙</span>
             <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
           </div>
-          <button onClick={handleSignout} style={{
-            background: "none",
-            border: "1px solid #4c1d95",
-            color: "#9ca3af",
-            padding: "6px 14px",
-            borderRadius: 8,
-            cursor: "pointer",
-            fontSize: 13
-          }}>Sign out</button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <a href="/history" style={{
+              background: "none",
+              border: "1px solid #4c1d95",
+              color: "#9ca3af",
+              padding: "6px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 13,
+              textDecoration: "none"
+            }}>My dreams</a>
+            <button onClick={handleSignout} style={{
+              background: "none",
+              border: "1px solid #4c1d95",
+              color: "#9ca3af",
+              padding: "6px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 13
+            }}>Sign out</button>
+          </div>
         </div>
 
         <h2 style={{ fontSize: 20, fontWeight: "600", marginBottom: 8 }}>
