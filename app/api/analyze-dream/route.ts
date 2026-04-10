@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const { dream } = await request.json();
-    const apiKey = "AIzaSyDXwpL2saKamN0WU7MFLfjdIsnyjsS66LQ";
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
+    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDXwpL2saKamN0WU7MFLfjdIsnyjsS66LQ";    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
     
     const res = await fetch(url, {
       method: "POST",
