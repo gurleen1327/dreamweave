@@ -141,7 +141,6 @@ export default function MythMap() {
                     padding: 4,
                     cursor: "default",
                     transition: "transform 0.2s",
-                    title: `${s.name}: ${s.count} times`
                   }}>
                     {s.name.length > 8 ? s.name.slice(0, 7) + "..." : s.name}
                   </div>
