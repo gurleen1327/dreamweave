@@ -30,7 +30,6 @@ export default function Dashboard() {
     setLoading(true);
     setError("");
     setAnalysis(null);
-
     try {
       const res = await fetch("/api/analyze-dream", {
         method: "POST",
@@ -39,7 +38,6 @@ export default function Dashboard() {
       });
       const text = await res.text();
       const data = JSON.parse(text);
-
       const analysisData = {
         symbols: Array.isArray(data.symbols) ? data.symbols : [],
         emotions: Array.isArray(data.emotions) ? data.emotions : [],
@@ -47,9 +45,7 @@ export default function Dashboard() {
         mythology: data.mythology || "",
         advice: data.advice || ""
       };
-
       setAnalysis(analysisData);
-
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         await supabase.from("dreams").insert({
@@ -62,11 +58,9 @@ export default function Dashboard() {
           advice: analysisData.advice
         });
       }
-
     } catch (e) {
       setError("Something went wrong. Please try again.");
     }
-
     setLoading(false);
   }
 
@@ -98,10 +92,18 @@ export default function Dashboard() {
               color: "#9ca3af",
               padding: "6px 14px",
               borderRadius: 8,
-              cursor: "pointer",
               fontSize: 13,
               textDecoration: "none"
             }}>My dreams</a>
+            <a href="/mythmap" style={{
+              background: "none",
+              border: "1px solid #4c1d95",
+              color: "#9ca3af",
+              padding: "6px 14px",
+              borderRadius: 8,
+              fontSize: 13,
+              textDecoration: "none"
+            }}>Myth map 🗺️</a>
             <button onClick={handleSignout} style={{
               background: "none",
               border: "1px solid #4c1d95",
