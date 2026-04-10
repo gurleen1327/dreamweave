@@ -104,6 +104,15 @@ export default function Dashboard() {
               fontSize: 13,
               textDecoration: "none"
             }}>Myth map 🗺️</a>
+            <a href="/share" style={{
+  background: "none",
+  border: "1px solid #4c1d95",
+  color: "#9ca3af",
+  padding: "6px 14px",
+  borderRadius: 8,
+  fontSize: 13,
+  textDecoration: "none"
+}}>Share ✨</a>
             <button onClick={handleSignout} style={{
               background: "none",
               border: "1px solid #4c1d95",
