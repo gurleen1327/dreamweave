@@ -1,34 +1,43 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(request: Request) {
   try {
     const { dream } = await request.json();
-    const message = await client.messages.create({
-      model: "claude-opus-4-6",
-      max_tokens: 2048,
-      messages: [{ role: "user", content: `You are an expert dream analyst with deep knowledge of psychology, symbolism, and mythology. Analyze this dream in rich detail.
+    
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=AIzaSyDckED2H6dOTYuk0cbFiRZqbUVdCpBNsg8`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `You are an expert dream analyst. Analyze this dream in rich detail. Reply with ONLY raw JSON, no markdown, no backticks, no explanation:
+{"symbols": ["symbol1", "symbol2", "symbol3"], "emotions": ["emotion1", "emotion2"], "interpretation": "4-5 sentences analyzing the dream deeply.", "mythology": "2-3 sentences connecting to a myth or archetype.", "advice": "2 sentences of gentle advice."}
 
-Reply with ONLY this JSON format, no markdown, no backticks:
-{
-  "symbols": ["symbol1", "symbol2", "symbol3", "symbol4", "symbol5"],
-  "emotions": ["emotion1", "emotion2", "emotion3"],
-  "interpretation": "Write 4-5 sentences deeply analyzing what this dream means. Reference the specific symbols. Talk about what the subconscious might be processing. Make it feel personal and insightful.",
-  "mythology": "In 2-3 sentences, connect this dream to a myth, archetype, or universal human story it resembles.",
-  "advice": "In 2 sentences, give one gentle piece of advice based on what this dream might be telling the dreamer."
-}
+Dream: ${dream}`
+            }]
+          }]
+        })
+      }
+    );
 
-Dream: ${dream}` }]
-    });
-    const raw = message.content[0].type === "text" ? message.content[0].text : "{}";
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    const analysis = JSON.parse(raw.slice(start, end + 1));
+    const data = await res.json();
+    console.log("Gemini raw:", JSON.stringify(data));
+    const text = data.candidates[0].content.parts[0].text;
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    const analysis = JSON.parse(text.slice(start, end + 1));
     return NextResponse.json(analysis);
+
   } catch(e) {
     console.error("Error:", e);
-    return NextResponse.json({ symbols: ["dream"], emotions: ["wonder"], interpretation: "Your dream contains powerful imagery worth exploring.", mythology: "", advice: "" });
+    return NextResponse.json({
+      symbols: ["unknown"],
+      emotions: ["unknown"],
+      interpretation: "Could not analyze dream.",
+      mythology: "",
+      advice: ""
+    });
   }
 }
