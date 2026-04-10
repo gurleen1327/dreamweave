@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const { symbols } = await request.json();
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=AIzaSyDckED2H6dOTYuk0cbFiRZqbUVdCpBNsg8`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDXwpL2saKamN0WU7MFLfjdIsnyjsS66LQ`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

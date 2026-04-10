@@ -3,41 +3,33 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const { dream } = await request.json();
+    const apiKey = "AIzaSyDXwpL2saKamN0WU7MFLfjdIsnyjsS66LQ";
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + apiKey;
     
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=AIzaSyDckED2H6dOTYuk0cbFiRZqbUVdCpBNsg8`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are an expert dream analyst. Analyze this dream in rich detail. Reply with ONLY raw JSON, no markdown, no backticks, no explanation:
-{"symbols": ["symbol1", "symbol2", "symbol3"], "emotions": ["emotion1", "emotion2"], "interpretation": "4-5 sentences analyzing the dream deeply.", "mythology": "2-3 sentences connecting to a myth or archetype.", "advice": "2 sentences of gentle advice."}
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: "Analyze this dream and reply with ONLY JSON like this exact format with no markdown: {\"symbols\": [\"water\", \"flying\"], \"emotions\": [\"joy\", \"fear\"], \"interpretation\": \"Your dream means...\", \"mythology\": \"This connects to...\", \"advice\": \"You should...\"}. Dream: " + dream }] }]
+      })
+    });
 
-Dream: ${dream}`
-            }]
-          }]
-        })
-      }
-    );
+    const json = await res.json();
+    console.log("STATUS:", res.status);
+    console.log("BODY:", JSON.stringify(json).slice(0, 300));
 
-    const data = await res.json();
-    console.log("Gemini raw:", JSON.stringify(data));
-    const text = data.candidates[0].content.parts[0].text;
+    if (!json.candidates) {
+      console.log("NO CANDIDATES - full response:", JSON.stringify(json));
+      return NextResponse.json({ symbols: ["error"], emotions: ["error"], interpretation: JSON.stringify(json), mythology: "", advice: "" });
+    }
+
+    const text = json.candidates[0].content.parts[0].text;
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
     const analysis = JSON.parse(text.slice(start, end + 1));
     return NextResponse.json(analysis);
-
-  } catch(e) {
-    console.error("Error:", e);
-    return NextResponse.json({
-      symbols: ["unknown"],
-      emotions: ["unknown"],
-      interpretation: "Could not analyze dream.",
-      mythology: "",
-      advice: ""
-    });
+  } catch(e: any) {
+    console.log("CATCH ERROR:", e.message);
+    return NextResponse.json({ symbols: ["catch"], emotions: ["error"], interpretation: e.message, mythology: "", advice: "" });
   }
 }
