@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabase";
 
 function calculateStreak(dreams: any[]) {
@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [checking, setChecking] = useState(true);
   const [streak, setStreak] = useState(0);
   const [totalDreams, setTotalDreams] = useState(0);
+  const [recording, setRecording] = useState(false);
+  const recognitionRef = useRef(null as any);
 
   useEffect(() => {
     async function checkUser() {
@@ -47,6 +49,34 @@ export default function Dashboard() {
     }
     checkUser();
   }, []);
+
+  function toggleRecording() {
+    if (recording) {
+      recognitionRef.current?.stop();
+      setRecording(false);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice recording not supported in this browser. Try Chrome.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+    recognition.onresult = (event: any) => {
+      let transcript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setDream(transcript);
+    };
+    recognition.onend = () => setRecording(false);
+    recognition.start();
+    recognitionRef.current = recognition;
+    setRecording(true);
+  }
 
   async function handleSignout() {
     await supabase.auth.signOut();
@@ -187,27 +217,56 @@ export default function Dashboard() {
           What did you dream about?
         </h2>
         <p style={{ fontSize: 14, color: "#9ca3af", marginBottom: 20 }}>
-          Describe your dream in as much detail as you remember.
+          Describe your dream or tap the mic to speak it.
         </p>
 
-        <textarea
-          value={dream}
-          onChange={(e) => setDream(e.target.value)}
-          placeholder="I was standing in a field and suddenly the sky turned purple..."
-          rows={6}
-          style={{
-            width: "100%",
-            padding: "16px",
-            borderRadius: 12,
-            border: "1px solid #4c1d95",
-            background: "#13131a",
-            color: "white",
-            fontSize: 15,
-            outline: "none",
-            resize: "vertical",
-            fontFamily: "sans-serif"
-          }}
-        />
+        <div style={{ position: "relative" }}>
+          <textarea
+            value={dream}
+            onChange={(e) => setDream(e.target.value)}
+            placeholder="I was standing in a field and suddenly the sky turned purple..."
+            rows={6}
+            style={{
+              width: "100%",
+              padding: "16px",
+              paddingRight: "56px",
+              borderRadius: 12,
+              border: recording ? "1px solid #ef4444" : "1px solid #4c1d95",
+              background: "#13131a",
+              color: "white",
+              fontSize: 15,
+              outline: "none",
+              resize: "vertical",
+              fontFamily: "sans-serif"
+            }}
+          />
+          <button
+            onClick={toggleRecording}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: 12,
+              background: recording ? "#ef4444" : "#2e1065",
+              border: "none",
+              borderRadius: 8,
+              width: 36,
+              height: 36,
+              cursor: "pointer",
+              fontSize: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            {recording ? "⏹" : "🎙️"}
+          </button>
+        </div>
+
+        {recording && (
+          <p style={{ fontSize: 13, color: "#ef4444", marginTop: 8 }}>
+            🔴 Recording... speak your dream. Tap stop when done.
+          </p>
+        )}
 
         <button
           onClick={handleSubmit}
