@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 export default function History() {
   const [dreams, setDreams] = useState([] as any[]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(null as any);
 
   useEffect(() => {
     async function loadDreams() {
@@ -24,6 +25,15 @@ export default function History() {
     loadDreams();
   }, []);
 
+  async function deleteDream(id: string) {
+    const confirm = window.confirm("Delete this dream? This cannot be undone.");
+    if (!confirm) return;
+    setDeleting(id);
+    await supabase.from("dreams").delete().eq("id", id);
+    setDreams(dreams.filter((d: any) => d.id !== id));
+    setDeleting(null);
+  }
+
   return (
     <main style={{
       minHeight: "100vh",
@@ -36,7 +46,8 @@ export default function History() {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 28 }}>🌙</span>
+            <a href="/dashboard" style={{ color: "#9ca3af", textDecoration: "none", fontSize: 13 }}>← Back</a>
+            <span style={{ fontSize: 28 }}>📖</span>
             <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>My Dreams</h1>
           </div>
           <a href="/dashboard" style={{
@@ -78,16 +89,36 @@ export default function History() {
             border: "1px solid #4c1d95",
             borderRadius: 16,
             padding: 20,
-            marginBottom: 16
+            marginBottom: 16,
+            position: "relative"
           }}>
-            <p style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
-              {new Date(d.created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-            </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <p style={{ fontSize: 12, color: "#6b7280" }}>
+                {new Date(d.created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              </p>
+              <button
+                onClick={() => deleteDream(d.id)}
+                disabled={deleting === d.id}
+                style={{
+                  background: "none",
+                  border: "1px solid #4c1d95",
+                  color: "#6b7280",
+                  padding: "3px 10px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 12
+                }}
+              >
+                {deleting === d.id ? "..." : "🗑️ Delete"}
+              </button>
+            </div>
+
             <p style={{ fontSize: 14, color: "#e2e8f0", marginBottom: 12, lineHeight: 1.6 }}>
               {d.content.length > 150 ? d.content.slice(0, 150) + "..." : d.content}
             </p>
+
             {d.symbols && d.symbols.length > 0 && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any, marginBottom: 8 }}>
                 {d.symbols.map((s: string, i: number) => (
                   <span key={i} style={{
                     padding: "3px 10px",
@@ -98,6 +129,12 @@ export default function History() {
                   }}>{s}</span>
                 ))}
               </div>
+            )}
+
+            {d.interpretation && (
+              <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginTop: 8 }}>
+                {d.interpretation.slice(0, 100)}...
+              </p>
             )}
           </div>
         ))}
