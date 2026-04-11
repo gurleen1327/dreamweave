@@ -2,18 +2,46 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
+function calculateStreak(dreams: any[]) {
+  if (!dreams.length) return 0;
+  const dates = dreams.map((d: any) => new Date(d.created_at).toDateString());
+  const unique = [...new Set(dates)];
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < unique.length; i++) {
+    const check = new Date(today);
+    check.setDate(today.getDate() - i);
+    if (unique.includes(check.toDateString())) {
+      streak++;
+    } else break;
+  }
+  return streak;
+}
+
 export default function Dashboard() {
   const [dream, setDream] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null as any);
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [totalDreams, setTotalDreams] = useState(0);
 
   useEffect(() => {
     async function checkUser() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = "/login";
+        return;
+      }
+      const { data } = await supabase
+        .from("dreams")
+        .select("created_at")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+      if (data) {
+        setStreak(calculateStreak(data));
+        setTotalDreams(data.length);
       }
       setChecking(false);
     }
@@ -57,6 +85,7 @@ export default function Dashboard() {
           mythology: analysisData.mythology,
           advice: analysisData.advice
         });
+        setTotalDreams(prev => prev + 1);
       }
     } catch (e) {
       setError("Something went wrong. Please try again.");
@@ -80,50 +109,79 @@ export default function Dashboard() {
     }}>
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontSize: 28 }}>🌙</span>
             <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <a href="/history" style={{
-              background: "none",
-              border: "1px solid #4c1d95",
-              color: "#9ca3af",
-              padding: "6px 14px",
-              borderRadius: 8,
-              fontSize: 13,
-              textDecoration: "none"
+              background: "none", border: "1px solid #4c1d95",
+              color: "#9ca3af", padding: "6px 14px",
+              borderRadius: 8, fontSize: 13, textDecoration: "none"
             }}>My dreams</a>
             <a href="/mythmap" style={{
-              background: "none",
-              border: "1px solid #4c1d95",
-              color: "#9ca3af",
-              padding: "6px 14px",
-              borderRadius: 8,
-              fontSize: 13,
-              textDecoration: "none"
+              background: "none", border: "1px solid #4c1d95",
+              color: "#9ca3af", padding: "6px 14px",
+              borderRadius: 8, fontSize: 13, textDecoration: "none"
             }}>Myth map 🗺️</a>
             <a href="/share" style={{
-  background: "none",
-  border: "1px solid #4c1d95",
-  color: "#9ca3af",
-  padding: "6px 14px",
-  borderRadius: 8,
-  fontSize: 13,
-  textDecoration: "none"
-}}>Share ✨</a>
+              background: "none", border: "1px solid #4c1d95",
+              color: "#9ca3af", padding: "6px 14px",
+              borderRadius: 8, fontSize: 13, textDecoration: "none"
+            }}>Share ✨</a>
             <button onClick={handleSignout} style={{
-              background: "none",
-              border: "1px solid #4c1d95",
-              color: "#9ca3af",
-              padding: "6px 14px",
-              borderRadius: 8,
-              cursor: "pointer",
-              fontSize: 13
+              background: "none", border: "1px solid #4c1d95",
+              color: "#9ca3af", padding: "6px 14px",
+              borderRadius: 8, cursor: "pointer", fontSize: 13
             }}>Sign out</button>
           </div>
         </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+          marginBottom: 24
+        }}>
+          <div style={{
+            background: "#13131a",
+            border: "1px solid #4c1d95",
+            borderRadius: 12,
+            padding: 16,
+            textAlign: "center" as any
+          }}>
+            <div style={{ fontSize: 32 }}>{streak > 0 ? "🔥" : "💤"}</div>
+            <div style={{ fontSize: 28, fontWeight: "bold", color: "#c4b5fd" }}>{streak}</div>
+            <div style={{ fontSize: 12, color: "#9ca3af" }}>day streak</div>
+          </div>
+          <div style={{
+            background: "#13131a",
+            border: "1px solid #4c1d95",
+            borderRadius: 12,
+            padding: 16,
+            textAlign: "center" as any
+          }}>
+            <div style={{ fontSize: 32 }}>📖</div>
+            <div style={{ fontSize: 28, fontWeight: "bold", color: "#c4b5fd" }}>{totalDreams}</div>
+            <div style={{ fontSize: 12, color: "#9ca3af" }}>dreams logged</div>
+          </div>
+        </div>
+
+        {streak >= 3 && (
+          <div style={{
+            background: "#1a0533",
+            border: "1px solid #7c3aed",
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 24,
+            textAlign: "center" as any,
+            fontSize: 14,
+            color: "#c4b5fd"
+          }}>
+            🔥 {streak} day streak! Keep going!
+          </div>
+        )}
 
         <h2 style={{ fontSize: 20, fontWeight: "600", marginBottom: 8 }}>
           What did you dream about?
@@ -193,11 +251,8 @@ export default function Dashboard() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as any }}>
                 {analysis.symbols.map((s: string, i: number) => (
                   <span key={i} style={{
-                    padding: "4px 12px",
-                    background: "#2e1065",
-                    color: "#c4b5fd",
-                    borderRadius: 20,
-                    fontSize: 13
+                    padding: "4px 12px", background: "#2e1065",
+                    color: "#c4b5fd", borderRadius: 20, fontSize: 13
                   }}>{s}</span>
                 ))}
               </div>
@@ -208,11 +263,8 @@ export default function Dashboard() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as any }}>
                 {analysis.emotions.map((e: string, i: number) => (
                   <span key={i} style={{
-                    padding: "4px 12px",
-                    background: "#1e1b4b",
-                    color: "#a5b4fc",
-                    borderRadius: 20,
-                    fontSize: 13
+                    padding: "4px 12px", background: "#1e1b4b",
+                    color: "#a5b4fc", borderRadius: 20, fontSize: 13
                   }}>{e}</span>
                 ))}
               </div>
@@ -227,30 +279,22 @@ export default function Dashboard() {
 
             {analysis.mythology && (
               <div style={{
-                marginBottom: 20,
-                padding: 16,
-                background: "#0f0a1e",
-                borderRadius: 12,
+                marginBottom: 20, padding: 16,
+                background: "#0f0a1e", borderRadius: 12,
                 borderLeft: "3px solid #7c3aed"
               }}>
                 <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>🏛️ Mythological connection</p>
-                <p style={{ fontSize: 14, color: "#c4b5fd", lineHeight: 1.7 }}>
-                  {analysis.mythology}
-                </p>
+                <p style={{ fontSize: 14, color: "#c4b5fd", lineHeight: 1.7 }}>{analysis.mythology}</p>
               </div>
             )}
 
             {analysis.advice && (
               <div style={{
-                padding: 16,
-                background: "#0a1a0f",
-                borderRadius: 12,
-                borderLeft: "3px solid #059669"
+                padding: 16, background: "#0a1a0f",
+                borderRadius: 12, borderLeft: "3px solid #059669"
               }}>
                 <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 8 }}>✨ What your dream is telling you</p>
-                <p style={{ fontSize: 14, color: "#6ee7b7", lineHeight: 1.7 }}>
-                  {analysis.advice}
-                </p>
+                <p style={{ fontSize: 14, color: "#6ee7b7", lineHeight: 1.7 }}>{analysis.advice}</p>
               </div>
             )}
 
