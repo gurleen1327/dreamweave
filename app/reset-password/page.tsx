@@ -2,19 +2,19 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function Login() {
-  const [email, setEmail] = useState("");
+export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
+  async function handleUpdate() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setMessage(error.message);
     } else {
-      window.location.href = "/dashboard";
+      setMessage("Password updated! Redirecting...");
+      setTimeout(() => window.location.href = "/dashboard", 2000);
     }
     setLoading(false);
   }
@@ -31,38 +31,18 @@ export default function Login() {
       padding: "0 24px",
       fontFamily: "sans-serif"
     }}>
-
       <div style={{ fontSize: 36, marginBottom: 16 }}>🌙</div>
-
       <h1 style={{ fontSize: 28, fontWeight: "bold", color: "#c4b5fd", marginBottom: 8 }}>
-        Welcome back
+        Set new password
       </h1>
       <p style={{ fontSize: 14, color: "#9ca3af", marginBottom: 32 }}>
-        Your dreams are waiting
+        Enter your new password below
       </p>
 
       <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: 16 }}>
-
-        <input
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            padding: "12px 16px",
-            borderRadius: 10,
-            border: "1px solid #4c1d95",
-            background: "#13131a",
-            color: "white",
-            fontSize: 15,
-            outline: "none",
-            width: "100%"
-          }}
-        />
-
         <input
           type="password"
-          placeholder="Password"
+          placeholder="New password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -78,7 +58,7 @@ export default function Login() {
         />
 
         <button
-          onClick={handleLogin}
+          onClick={handleUpdate}
           disabled={loading}
           style={{
             padding: "12px 24px",
@@ -88,34 +68,18 @@ export default function Login() {
             fontWeight: "600",
             fontSize: 16,
             border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
-            marginTop: 8
+            cursor: loading ? "not-allowed" : "pointer"
           }}
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Updating..." : "Update password"}
         </button>
 
         {message && (
-          <p style={{ fontSize: 14, color: "#f87171", textAlign: "center" }}>
+          <p style={{ fontSize: 14, color: "#c4b5fd", textAlign: "center" }}>
             {message}
           </p>
         )}
-
-        <p style={{ marginTop: 4, fontSize: 14, color: "#9ca3af", textAlign: "center" }}>
-          <a href="/forgot-password" style={{ color: "#c4b5fd", textDecoration: "none" }}>
-            Forgot your password?
-          </a>
-        </p>
-
       </div>
-
-      <p style={{ marginTop: 24, fontSize: 14, color: "#9ca3af" }}>
-        Don't have an account?{" "}
-        <a href="/signup" style={{ color: "#c4b5fd", textDecoration: "none" }}>
-          Sign up
-        </a>
-      </p>
-
     </main>
   );
 }
