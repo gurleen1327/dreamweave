@@ -73,7 +73,9 @@ export default function Home() {
           <p style={{ fontSize: 12, color: "#9ca3af" }}>Personal myth map</p>
         </div>
       </div>
-
+      <div style={{ marginTop: 48, fontSize: 12, color: "#4c1d95" }}>
+  <a href="/privacy" style={{ color: "#4c1d95", textDecoration: "none" }}>Privacy Policy</a>
+</div>
     </main>
   );
 }
