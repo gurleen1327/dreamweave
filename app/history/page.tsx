@@ -234,6 +234,51 @@ export default function History() {
         ))}
 
       </div>
+      {/* Bottom navigation */}
+      <div style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: "#0d0d14",
+        borderTop: "1px solid #1e1b4b",
+        display: "flex",
+        justifyContent: "space-around",
+        padding: "12px 0 20px 0"
+      }}>
+        <a href="/dashboard" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>🌙</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>Journal</span>
+        </a>
+        <a href="/history" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>📖</span>
+          <span style={{ fontSize: 10, color: "#7c3aed" }}>History</span>
+        </a>
+        <a href="/mythmap" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>🗺️</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>Myth Map</span>
+        </a>
+        <a href="/share" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>✨</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>Share</span>
+        </a>
+      </div>
     </main>
   );
 }
