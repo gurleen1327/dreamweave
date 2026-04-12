@@ -18,8 +18,17 @@ function calculateStreak(dreams: any[]) {
   return streak;
 }
 
+const moods = [
+  { value: 1, emoji: "😨", label: "Nightmare" },
+  { value: 2, emoji: "😟", label: "Unsettling" },
+  { value: 3, emoji: "😐", label: "Neutral" },
+  { value: 4, emoji: "😊", label: "Pleasant" },
+  { value: 5, emoji: "🤩", label: "Amazing" }
+];
+
 export default function Dashboard() {
   const [dream, setDream] = useState("");
+  const [mood, setMood] = useState(3);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null as any);
   const [error, setError] = useState("");
@@ -109,6 +118,7 @@ export default function Dashboard() {
         await supabase.from("dreams").insert({
           user_id: session.user.id,
           content: dream,
+          mood: mood,
           symbols: analysisData.symbols,
           emotions: analysisData.emotions,
           interpretation: analysisData.interpretation,
@@ -267,6 +277,34 @@ export default function Dashboard() {
             🔴 Recording... speak your dream. Tap stop when done.
           </p>
         )}
+
+        {/* Mood selector */}
+        <div style={{ marginTop: 20, marginBottom: 8 }}>
+          <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 12 }}>How did this dream feel?</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "space-between" }}>
+            {moods.map((m) => (
+              <button
+                key={m.value}
+                onClick={() => setMood(m.value)}
+                style={{
+                  flex: 1,
+                  padding: "10px 4px",
+                  borderRadius: 10,
+                  border: mood === m.value ? "2px solid #7c3aed" : "1px solid #4c1d95",
+                  background: mood === m.value ? "#2e1065" : "#13131a",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 4
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{m.emoji}</span>
+                <span style={{ fontSize: 10, color: "#9ca3af" }}>{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <button
           onClick={handleSubmit}
