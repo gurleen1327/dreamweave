@@ -145,39 +145,24 @@ export default function Dashboard() {
       background: "#0a0a0f",
       color: "white",
       fontFamily: "sans-serif",
-      padding: "40px 24px"
+      padding: "24px 24px 100px 24px"
     }}>
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
 
+        {/* Top header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 28 }}>🌙</span>
-            <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 24 }}>🌙</span>
+            <h1 style={{ fontSize: 20, fontWeight: "bold", color: "#c4b5fd" }}>Dreamweave</h1>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <a href="/history" style={{
-              background: "none", border: "1px solid #4c1d95",
-              color: "#9ca3af", padding: "6px 14px",
-              borderRadius: 8, fontSize: 13, textDecoration: "none"
-            }}>My dreams</a>
-            <a href="/mythmap" style={{
-              background: "none", border: "1px solid #4c1d95",
-              color: "#9ca3af", padding: "6px 14px",
-              borderRadius: 8, fontSize: 13, textDecoration: "none"
-            }}>Myth map 🗺️</a>
-            <a href="/share" style={{
-              background: "none", border: "1px solid #4c1d95",
-              color: "#9ca3af", padding: "6px 14px",
-              borderRadius: 8, fontSize: 13, textDecoration: "none"
-            }}>Share ✨</a>
-            <button onClick={handleSignout} style={{
-              background: "none", border: "1px solid #4c1d95",
-              color: "#9ca3af", padding: "6px 14px",
-              borderRadius: 8, cursor: "pointer", fontSize: 13
-            }}>Sign out</button>
-          </div>
+          <button onClick={handleSignout} style={{
+            background: "none", border: "1px solid #4c1d95",
+            color: "#9ca3af", padding: "6px 12px",
+            borderRadius: 8, cursor: "pointer", fontSize: 12
+          }}>Sign out</button>
         </div>
 
+        {/* Stats */}
         <div style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -191,8 +176,8 @@ export default function Dashboard() {
             padding: 16,
             textAlign: "center" as any
           }}>
-            <div style={{ fontSize: 32 }}>{streak > 0 ? "🔥" : "💤"}</div>
-            <div style={{ fontSize: 28, fontWeight: "bold", color: "#c4b5fd" }}>{streak}</div>
+            <div style={{ fontSize: 28 }}>{streak > 0 ? "🔥" : "💤"}</div>
+            <div style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>{streak}</div>
             <div style={{ fontSize: 12, color: "#9ca3af" }}>day streak</div>
           </div>
           <div style={{
@@ -202,8 +187,8 @@ export default function Dashboard() {
             padding: 16,
             textAlign: "center" as any
           }}>
-            <div style={{ fontSize: 32 }}>📖</div>
-            <div style={{ fontSize: 28, fontWeight: "bold", color: "#c4b5fd" }}>{totalDreams}</div>
+            <div style={{ fontSize: 28 }}>📖</div>
+            <div style={{ fontSize: 24, fontWeight: "bold", color: "#c4b5fd" }}>{totalDreams}</div>
             <div style={{ fontSize: 12, color: "#9ca3af" }}>dreams logged</div>
           </div>
         </div>
@@ -223,10 +208,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        <h2 style={{ fontSize: 20, fontWeight: "600", marginBottom: 8 }}>
+        <h2 style={{ fontSize: 18, fontWeight: "600", marginBottom: 6 }}>
           What did you dream about?
         </h2>
-        <p style={{ fontSize: 14, color: "#9ca3af", marginBottom: 20 }}>
+        <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>
           Describe your dream or tap the mic to speak it.
         </p>
 
@@ -299,8 +284,8 @@ export default function Dashboard() {
                   gap: 4
                 }}
               >
-                <span style={{ fontSize: 24 }}>{m.emoji}</span>
-                <span style={{ fontSize: 10, color: "#9ca3af" }}>{m.label}</span>
+                <span style={{ fontSize: 22 }}>{m.emoji}</span>
+                <span style={{ fontSize: 9, color: "#9ca3af" }}>{m.label}</span>
               </button>
             ))}
           </div>
@@ -398,6 +383,52 @@ export default function Dashboard() {
           </div>
         )}
 
+      </div>
+
+      {/* Bottom navigation */}
+      <div style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: "#0d0d14",
+        borderTop: "1px solid #1e1b4b",
+        display: "flex",
+        justifyContent: "space-around",
+        padding: "12px 0 20px 0"
+      }}>
+        <a href="/dashboard" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none", color: "#7c3aed"
+        }}>
+          <span style={{ fontSize: 22 }}>🌙</span>
+          <span style={{ fontSize: 10, color: "#7c3aed" }}>Journal</span>
+        </a>
+        <a href="/history" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>📖</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>History</span>
+        </a>
+        <a href="/mythmap" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>🗺️</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>Myth Map</span>
+        </a>
+        <a href="/share" style={{
+          display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+          textDecoration: "none"
+        }}>
+          <span style={{ fontSize: 22 }}>✨</span>
+          <span style={{ fontSize: 10, color: "#6b7280" }}>Share</span>
+        </a>
       </div>
     </main>
   );
