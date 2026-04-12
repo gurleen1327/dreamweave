@@ -6,6 +6,7 @@ export default function History() {
   const [dreams, setDreams] = useState([] as any[]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null as any);
+  const [selected, setSelected] = useState(null as any);
 
   useEffect(() => {
     async function loadDreams() {
@@ -31,8 +32,13 @@ export default function History() {
     setDeleting(id);
     await supabase.from("dreams").delete().eq("id", id);
     setDreams(dreams.filter((d: any) => d.id !== id));
+    if (selected?.id === id) setSelected(null);
     setDeleting(null);
   }
+
+  const moodEmoji: Record<number, string> = {
+    1: "😨", 2: "😟", 3: "😐", 4: "😊", 5: "🤩"
+  };
 
   return (
     <main style={{
@@ -83,21 +89,111 @@ export default function History() {
           </div>
         )}
 
-        {dreams.map((d: any) => (
-          <div key={d.id} style={{
+        {/* Full dream view */}
+        {selected && (
+          <div style={{
             background: "#13131a",
-            border: "1px solid #4c1d95",
+            border: "1px solid #7c3aed",
             borderRadius: 16,
-            padding: 20,
-            marginBottom: 16,
-            position: "relative"
+            padding: 24,
+            marginBottom: 24
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <p style={{ fontSize: 12, color: "#6b7280" }}>
-                {new Date(d.created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                {new Date(selected.created_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                {selected.mood && <span style={{ marginLeft: 8 }}>{moodEmoji[selected.mood]}</span>}
               </p>
+              <button onClick={() => setSelected(null)} style={{
+                background: "none", border: "none",
+                color: "#9ca3af", cursor: "pointer", fontSize: 13
+              }}>✕ Close</button>
+            </div>
+
+            <p style={{ fontSize: 15, color: "#e2e8f0", lineHeight: 1.7, marginBottom: 20 }}>
+              {selected.content}
+            </p>
+
+            {selected.symbols && selected.symbols.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>Symbols</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any }}>
+                  {selected.symbols.map((s: string, i: number) => (
+                    <span key={i} style={{
+                      padding: "3px 10px", background: "#2e1065",
+                      color: "#c4b5fd", borderRadius: 20, fontSize: 12
+                    }}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selected.emotions && selected.emotions.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>Emotions</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any }}>
+                  {selected.emotions.map((e: string, i: number) => (
+                    <span key={i} style={{
+                      padding: "3px 10px", background: "#1e1b4b",
+                      color: "#a5b4fc", borderRadius: 20, fontSize: 12
+                    }}>{e}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selected.interpretation && (
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>Interpretation</p>
+                <p style={{ fontSize: 14, color: "#e2e8f0", lineHeight: 1.7 }}>{selected.interpretation}</p>
+              </div>
+            )}
+
+            {selected.mythology && (
+              <div style={{
+                marginBottom: 16, padding: 14,
+                background: "#0f0a1e", borderRadius: 10,
+                borderLeft: "3px solid #7c3aed"
+              }}>
+                <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>🏛️ Mythological connection</p>
+                <p style={{ fontSize: 14, color: "#c4b5fd", lineHeight: 1.7 }}>{selected.mythology}</p>
+              </div>
+            )}
+
+            {selected.advice && (
+              <div style={{
+                padding: 14, background: "#0a1a0f",
+                borderRadius: 10, borderLeft: "3px solid #059669"
+              }}>
+                <p style={{ fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>✨ What your dream was telling you</p>
+                <p style={{ fontSize: 14, color: "#6ee7b7", lineHeight: 1.7 }}>{selected.advice}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {dreams.map((d: any) => (
+          <div
+            key={d.id}
+            onClick={() => setSelected(d)}
+            style={{
+              background: selected?.id === d.id ? "#1a0f2e" : "#13131a",
+              border: selected?.id === d.id ? "1px solid #7c3aed" : "1px solid #4c1d95",
+              borderRadius: 16,
+              padding: 20,
+              marginBottom: 16,
+              cursor: "pointer",
+              transition: "border 0.2s"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <p style={{ fontSize: 12, color: "#6b7280" }}>
+                  {new Date(d.created_at).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                </p>
+                {d.mood && <span style={{ fontSize: 16 }}>{moodEmoji[d.mood]}</span>}
+              </div>
               <button
-                onClick={() => deleteDream(d.id)}
+                onClick={(e) => { e.stopPropagation(); deleteDream(d.id); }}
                 disabled={deleting === d.id}
                 style={{
                   background: "none",
@@ -109,33 +205,31 @@ export default function History() {
                   fontSize: 12
                 }}
               >
-                {deleting === d.id ? "..." : "🗑️ Delete"}
+                {deleting === d.id ? "..." : "🗑️"}
               </button>
             </div>
 
             <p style={{ fontSize: 14, color: "#e2e8f0", marginBottom: 12, lineHeight: 1.6 }}>
-              {d.content.length > 150 ? d.content.slice(0, 150) + "..." : d.content}
+              {d.content.length > 120 ? d.content.slice(0, 120) + "..." : d.content}
             </p>
 
             {d.symbols && d.symbols.length > 0 && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any, marginBottom: 8 }}>
-                {d.symbols.map((s: string, i: number) => (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as any }}>
+                {d.symbols.slice(0, 4).map((s: string, i: number) => (
                   <span key={i} style={{
-                    padding: "3px 10px",
-                    background: "#2e1065",
-                    color: "#c4b5fd",
-                    borderRadius: 20,
-                    fontSize: 12
+                    padding: "3px 10px", background: "#2e1065",
+                    color: "#c4b5fd", borderRadius: 20, fontSize: 12
                   }}>{s}</span>
                 ))}
+                {d.symbols.length > 4 && (
+                  <span style={{ fontSize: 12, color: "#6b7280", padding: "3px 0" }}>+{d.symbols.length - 4} more</span>
+                )}
               </div>
             )}
 
-            {d.interpretation && (
-              <p style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginTop: 8 }}>
-                {d.interpretation.slice(0, 100)}...
-              </p>
-            )}
+            <p style={{ fontSize: 12, color: "#4c1d95", marginTop: 10 }}>
+              Tap to see full analysis →
+            </p>
           </div>
         ))}
 
