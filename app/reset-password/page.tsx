@@ -1,11 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setReady(true);
+      }
+    });
+  }, []);
 
   async function handleUpdate() {
     setLoading(true);
@@ -36,50 +45,52 @@ export default function ResetPassword() {
         Set new password
       </h1>
       <p style={{ fontSize: 14, color: "#9ca3af", marginBottom: 32 }}>
-        Enter your new password below
+        {ready ? "Enter your new password below" : "Verifying your reset link..."}
       </p>
 
-      <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: 16 }}>
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            padding: "12px 16px",
-            borderRadius: 10,
-            border: "1px solid #4c1d95",
-            background: "#13131a",
-            color: "white",
-            fontSize: 15,
-            outline: "none",
-            width: "100%"
-          }}
-        />
+      {ready && (
+        <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: 16 }}>
+          <input
+            type="password"
+            placeholder="New password (min 6 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              padding: "12px 16px",
+              borderRadius: 10,
+              border: "1px solid #4c1d95",
+              background: "#13131a",
+              color: "white",
+              fontSize: 15,
+              outline: "none",
+              width: "100%"
+            }}
+          />
 
-        <button
-          onClick={handleUpdate}
-          disabled={loading}
-          style={{
-            padding: "12px 24px",
-            borderRadius: 10,
-            background: loading ? "#4c1d95" : "#7c3aed",
-            color: "white",
-            fontWeight: "600",
-            fontSize: 16,
-            border: "none",
-            cursor: loading ? "not-allowed" : "pointer"
-          }}
-        >
-          {loading ? "Updating..." : "Update password"}
-        </button>
+          <button
+            onClick={handleUpdate}
+            disabled={loading || password.length < 6}
+            style={{
+              padding: "12px 24px",
+              borderRadius: 10,
+              background: loading ? "#4c1d95" : "#7c3aed",
+              color: "white",
+              fontWeight: "600",
+              fontSize: 16,
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer"
+            }}
+          >
+            {loading ? "Updating..." : "Update password"}
+          </button>
 
-        {message && (
-          <p style={{ fontSize: 14, color: "#c4b5fd", textAlign: "center" }}>
-            {message}
-          </p>
-        )}
-      </div>
+          {message && (
+            <p style={{ fontSize: 14, color: "#c4b5fd", textAlign: "center" }}>
+              {message}
+            </p>
+          )}
+        </div>
+      )}
     </main>
   );
 }
