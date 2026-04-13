@@ -14,8 +14,8 @@ export default function Signup() {
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage("Account created! Check your email to confirm.");
-    }
+      setMessage("Account created! Redirecting...");
+      setTimeout(() => window.location.href = "/dashboard", 1500);    }
     setLoading(false);
   }
 
