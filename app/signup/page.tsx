@@ -10,13 +10,23 @@ export default function Signup() {
 
   async function handleSignup() {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Account created! Redirecting...");
-      setTimeout(() => window.location.href = "/dashboard", 1500);    }
-    setLoading(false);
+      setLoading(false);
+      return;
+    }
+    if (data.session) {
+      window.location.href = "/dashboard";
+      return;
+    }
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setMessage("Account created! Please sign in.");
+      setLoading(false);
+      return;
+    }
+    window.location.href = "/dashboard";
   }
 
   return (
@@ -62,7 +72,7 @@ export default function Signup() {
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Password (min 6 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -96,7 +106,7 @@ export default function Signup() {
         </button>
 
         {message && (
-          <p style={{ fontSize: 14, color: "#c4b5fd", textAlign: "center" }}>
+          <p style={{ fontSize: 14, color: "#f87171", textAlign: "center" }}>
             {message}
           </p>
         )}
