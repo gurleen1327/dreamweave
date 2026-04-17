@@ -52,7 +52,8 @@ export default function Dashboard() {
         .order("created_at", { ascending: false });
       if (data) {
         setStreak(calculateStreak(data));
-        setTotalDreams(data.length);
+        setTotalDreams(prev => prev + 1);
+setStreak(prev => prev === 0 ? 1 : prev + 1);
       }
       setChecking(false);
     }
